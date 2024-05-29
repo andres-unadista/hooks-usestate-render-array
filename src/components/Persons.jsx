@@ -10,6 +10,7 @@ export const Persons = ({ persons, setPersons }) => {
     img: '',
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [personToDelete, setPersonToDelete] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,19 +43,41 @@ export const Persons = ({ persons, setPersons }) => {
     setIsEditing(false);
   };
 
+  // Métodos para eliminar a una persona del array
+  // Establece la persona a eliminar
+  const handleDelete = (id) => {
+    setPersonToDelete(id);
+  };
+
+  const confirmDelete = (e) => {
+    setPersons(persons.filter((person) => person.id !== personToDelete));
+    setPersonToDelete(null);
+  };
+
+  const cancelDelete = (e) => {
+    setPersonToDelete(null);
+  };
+
+  const handleCreate = () => {
+    const person = editedPerson;
+    setPersons([...persons, person]);
+  };
+
   return (
     <div>
       <h2>IT Team</h2>
-      <div className="container d-flex justify-content-center ">
-        <div className="d-flex flex-row">
+      <div className="container d-flex justify-content-center">
+        <div className="row d-flex flex-wrap row-cols-1 row-cols-md-2 row-cols-lg-3 ">
           {persons.map((person) => {
             return (
               <div key={person.id}>
                 <Person
                   name={person.name}
+                  id={person.id}
                   role={person.role}
                   img={person.img}
                   handleEdit={() => handleEdit(person.id)}
+                  handleDelete={handleDelete}
                 />
               </div>
             );
@@ -63,7 +86,7 @@ export const Persons = ({ persons, setPersons }) => {
       </div>
       <div className="mt-4 container row">
         <div className="col-md-8 mx-auto bg-light">
-          <h2>Modificar datos</h2>
+          <h2>{isEditing ? 'Modificar datos' : 'Crear Persona'}</h2>
           <input
             type="text"
             name="name"
@@ -89,9 +112,37 @@ export const Persons = ({ persons, setPersons }) => {
             className="form-control mb-2"
           />
           <div className="mt-2">
-            <button className="btn btn-primary" onClick={handleSave}>
-              Guardar
+            <button className="btn btn-primary" onClick={isEditing ? handleSave : handleCreate}>
+              {isEditing ? 'Modificar' : 'Guardar'}
             </button>
+          </div>
+        </div>
+        {/* Modal de confirmación de eliminación */}
+        <div id="deleteModal" className="modal fade" tabIndex="-1">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">Confirmar Eliminación</h4>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  onClick={cancelDelete}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>¿Estás seguro de eliminar a {persons.find((person) => person.id === personToDelete)?.name}</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" onClick={cancelDelete}>
+                  Cancelar
+                </button>
+                <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={confirmDelete}>
+                  Eliminar
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
